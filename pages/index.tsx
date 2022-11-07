@@ -1,14 +1,6 @@
 import React from "react";
-import {
-  Box,
-  Grid,
-  Icon,
-  Link,
-  SimpleGrid,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
-import NextLink from "next/link";
+import { Box, Grid, Icon, SimpleGrid, Text, VStack } from "@chakra-ui/react";
+import Link from "next/link";
 import { FcBullish, FcBusinesswoman } from "react-icons/fc";
 import ColorModeSwitcher from "../components/ColorModeSwitcher";
 import Logo from "../components/Logo";
@@ -30,7 +22,7 @@ const Home = () => {
             textAlign="center"
             rounded="lg"
           >
-            <NextLink href="crypto-market" passHref>
+            <Link href="crypto-market" passHref>
               <Box
                 boxShadow="xs"
                 p="6"
@@ -46,13 +38,13 @@ const Home = () => {
                 }}
               >
                 <Icon as={FcBullish} w={20} h={20} />
-                <Link color="teal.500" fontSize="xl" display="block">
+                <Text color="teal.500" fontSize="xl" display="block">
                   Crypto Market
-                </Link>
+                </Text>
               </Box>
-            </NextLink>
+            </Link>
 
-            <NextLink href="mama-muda" passHref>
+            <Link href="mama-muda" passHref>
               <Box
                 boxShadow="xs"
                 p="6"
@@ -68,11 +60,11 @@ const Home = () => {
                 }}
               >
                 <Icon as={FcBusinesswoman} w={20} h={20} />
-                <Link color="teal.500" fontSize="xl" display="block">
+                <Text color="teal.500" fontSize="xl" display="block">
                   Mama Muda
-                </Link>
+                </Text>
               </Box>
-            </NextLink>
+            </Link>
           </SimpleGrid>
         </VStack>
       </Grid>
