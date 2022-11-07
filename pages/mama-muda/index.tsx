@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -11,7 +11,7 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import Layout from "../../components/Layout";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import MamaTable from "./MamaTable";
 import { useForm } from "react-hook-form";
 
@@ -47,19 +47,54 @@ const submitMessage = async (data: MessageProps) => {
 };
 
 const MamaMuda = () => {
+  const queryClient = useQueryClient();
   const { data, isSuccess } = useQuery("get-mama-muda", getMessages, {
-    staleTime: 5000,
-    refetchInterval: 5000,
+    staleTime: 15000,
+    refetchInterval: 15000,
   });
 
-  const { handleSubmit, setError, register, reset, clearErrors } =
-    useForm<MessageProps>();
+  const {
+    handleSubmit,
+    formState: { errors },
+    register,
+    reset,
+    clearErrors,
+  } = useForm<MessageProps>();
+
+  const [errorMessage, setErrorMessage] = useState("");
 
   const mutation = useMutation(submitMessage, {
-    // onError,
-    // onMutate,
-    // onSettled,
+    onMutate: () => {
+      // mutation in progress
+      // use for : spinner, disabled form, etc
+      console.log("onMutate");
+    },
+    onSettled: async (data, error: any) => {
+      // mutation done ->> success, error
+      if (data) {
+        await queryClient.invalidateQueries("get-mama-muda");
+        setErrorMessage("");
+        reset();
+        clearErrors();
+      }
+
+      if (error) {
+        setErrorMessage(error.message);
+      }
+    },
+    onError: async () => {
+      // mutation done with error response
+      console.log("onError");
+    },
+    onSuccess: async () => {
+      // mutation done with success response
+      console.log("onSuccess");
+    },
   });
+
+  const onSubmit = async (data: MessageProps) => {
+    await mutation.mutate(data);
+  };
 
   return (
     <Layout title="💌 Mama Muda" subTitle="Minta Pulsa">
@@ -84,7 +119,7 @@ const MamaMuda = () => {
               ✍️ Request Pulsa
             </Text>
             <form>
-              <FormControl pb={4}>
+              <FormControl pb={4} isInvalid={errors.phoneNumber ? true : false}>
                 <FormLabel
                   htmlFor="phoneNumber"
                   fontWeight="bold"
@@ -94,11 +129,18 @@ const MamaMuda = () => {
                 >
                   Phone Number
                 </FormLabel>
-                <Input name="phoneNumber" placeholder="Phone Number" />
-                <FormErrorMessage></FormErrorMessage>
+                <Input
+                  placeholder="Phone Number"
+                  {...register("phoneNumber", {
+                    required: "phone number required",
+                  })}
+                />
+                <FormErrorMessage>
+                  {errors.phoneNumber && errors.phoneNumber.message}
+                </FormErrorMessage>
               </FormControl>
 
-              <FormControl>
+              <FormControl isInvalid={errors.message ? true : false}>
                 <FormLabel
                   htmlFor="name"
                   fontWeight="bold"
@@ -108,11 +150,21 @@ const MamaMuda = () => {
                 >
                   Message
                 </FormLabel>
-                <Textarea placeholder="Bullshit Message" />
-                <FormErrorMessage></FormErrorMessage>
+                <Textarea
+                  placeholder="Bullshit Message"
+                  {...register("message", { required: "message required" })}
+                />
+                <FormErrorMessage>
+                  {errors.message && errors.message.message}
+                </FormErrorMessage>
               </FormControl>
 
-              <Button mt={4} colorScheme="teal" type="submit">
+              <Button
+                mt={4}
+                colorScheme="teal"
+                type="submit"
+                onClick={handleSubmit(onSubmit)}
+              >
                 Send
               </Button>
             </form>
