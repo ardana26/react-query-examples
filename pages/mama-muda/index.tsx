@@ -29,8 +29,8 @@ export interface MessageProps {
   status?: string;
 }
 
-export const formatDate = (date: string) => {
-  return new Date(date)?.toLocaleString("id-Id");
+export const formatDate = (date: string = "2022-11-07T22:40:02.178Z") => {
+  return new Date(date).toLocaleString("id-Id");
 };
 
 const submitMessage = async (data: MessageProps) => {
