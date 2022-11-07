@@ -28,6 +28,10 @@ interface PriceProps {
   market_cap: number;
 }
 
+interface PageProps {
+  initialPrice: PriceProps[];
+}
+
 const getMarket = async (page = 1) => {
   const URL = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=idr&per_page=10&page=${page}`;
   const response = await fetch(URL);
@@ -58,7 +62,13 @@ const Percentage = ({ percent }: { percent: number }) => {
   return <Text color={color}>{formatPercent}</Text>;
 };
 
-const Market = () => {
+export async function getStaticProps() {
+  const initialPrice = await getMarket();
+
+  return { props: { initialPrice } };
+}
+
+const Market = ({ initialPrice }: PageProps) => {
   const [page, setPage] = useState(1);
 
   const previousPage = () => {
@@ -75,6 +85,7 @@ const Market = () => {
     {
       staleTime: 3000, // ms
       refetchInterval: 3000,
+      initialData: initialPrice,
     }
   );
 
