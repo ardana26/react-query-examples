@@ -14,7 +14,8 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import { useQuery } from "react-query";
+import { QueryClient, useQuery } from "react-query";
+import { dehydrate } from "react-query/hydration";
 import Layout from "../../components/Layout";
 
 interface PriceProps {
@@ -62,13 +63,25 @@ const Percentage = ({ percent }: { percent: number }) => {
   return <Text color={color}>{formatPercent}</Text>;
 };
 
-export async function getStaticProps() {
-  const initialPrice = await getMarket();
+// SSR with initial Data
+// export async function getStaticProps() {
+//   const initialPrice = await getMarket();
+//   return { props: { initialPrice } };
+// }
 
-  return { props: { initialPrice } };
+// SSR with Hydrate
+export async function getStaticProps() {
+  const queryClient = new QueryClient();
+  queryClient.prefetchQuery(["market", 1], () => getMarket());
+
+  return {
+    props: {
+      dehydratedState: dehydrate(queryClient),
+    },
+  };
 }
 
-const Market = ({ initialPrice }: PageProps) => {
+const Market = () => {
   const [page, setPage] = useState(1);
 
   const previousPage = () => {
@@ -85,7 +98,7 @@ const Market = ({ initialPrice }: PageProps) => {
     {
       staleTime: 3000, // ms
       refetchInterval: 3000,
-      initialData: initialPrice,
+      // initialData: initialPrice,
     }
   );
 
