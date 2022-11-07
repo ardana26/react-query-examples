@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Badge,
   Box,
   Button,
   Flex,
@@ -8,18 +7,60 @@ import {
   FormErrorMessage,
   FormLabel,
   Input,
-  Table,
-  Tbody,
-  Td,
   Text,
   Textarea,
-  Th,
-  Thead,
-  Tr,
 } from "@chakra-ui/react";
 import Layout from "../../components/Layout";
+import { useMutation, useQuery } from "react-query";
+import MamaTable from "./MamaTable";
+import { useForm } from "react-hook-form";
+
+const getMessages = async () => {
+  const URL = "http://localhost:3000/api/message";
+  const result = await fetch(URL);
+  return await result.json();
+};
+
+export interface MessageProps {
+  id?: number;
+  createdAt?: string;
+  phoneNumber: number;
+  message: string;
+  status?: string;
+}
+
+export const formatDate = (date: string) => {
+  return new Date(date)?.toLocaleString("id-Id");
+};
+
+const submitMessage = async (data: MessageProps) => {
+  const URL = "http://localhost:3000/api/message";
+  const response = await fetch(URL, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("An error has occureed");
+  }
+  return await response.json();
+};
 
 const MamaMuda = () => {
+  const { data, isSuccess } = useQuery("get-mama-muda", getMessages, {
+    staleTime: 5000,
+    refetchInterval: 5000,
+  });
+
+  const { handleSubmit, setError, register, reset, clearErrors } =
+    useForm<MessageProps>();
+
+  const mutation = useMutation(submitMessage, {
+    // onError,
+    // onMutate,
+    // onSettled,
+  });
+
   return (
     <Layout title="💌 Mama Muda" subTitle="Minta Pulsa">
       <Flex>
@@ -77,70 +118,7 @@ const MamaMuda = () => {
             </form>
           </Box>
         </Box>
-        <Box flex="1">
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Date</Th>
-                <Th>Phone Number</Th>
-                <Th>Message</Th>
-                <Th>Status</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              <Tr>
-                <Td>1/1/2021</Td>
-                <Td>085267852222</Td>
-                <Td>
-                  Mama lagi di kantor polisi, kirim pulsa 10jt sekarang. CEPAT !
-                </Td>
-                <Td>
-                  <Badge colorScheme="yellow">waiting</Badge>
-                </Td>
-              </Tr>
-              <Tr>
-                <Td>1/1/2021</Td>
-                <Td>085267852333</Td>
-                <Td>
-                  Mama lagi di kantor lurah, kirim pulsa 20jt sekarang. CEPAT !
-                </Td>
-                <Td>
-                  <Badge colorScheme="green">success</Badge>
-                </Td>
-              </Tr>
-              <Tr>
-                <Td>1/1/2021</Td>
-                <Td>085267852444</Td>
-                <Td>
-                  Mama lagi di mana mana, kirim pulsa 30jt sekarang. CEPAT !
-                </Td>
-                <Td>
-                  <Badge colorScheme="red">failed</Badge>
-                </Td>
-              </Tr>
-              <Tr>
-                <Td>1/1/2021</Td>
-                <Td>085267852444</Td>
-                <Td>
-                  Mama lagi di mana mana, kirim pulsa 30jt sekarang. CEPAT !
-                </Td>
-                <Td>
-                  <Badge colorScheme="red">failed</Badge>
-                </Td>
-              </Tr>
-              <Tr>
-                <Td>1/1/2021</Td>
-                <Td>085267852444</Td>
-                <Td>
-                  Mama lagi di mana mana, kirim pulsa 30jt sekarang. CEPAT !
-                </Td>
-                <Td>
-                  <Badge colorScheme="red">failed</Badge>
-                </Td>
-              </Tr>
-            </Tbody>
-          </Table>
-        </Box>
+        <Box flex="1">{isSuccess && <MamaTable data={data} />}</Box>
       </Flex>
     </Layout>
   );
