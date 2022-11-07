@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Grid, Icon, SimpleGrid, Text, VStack } from "@chakra-ui/react";
-import Link from "next/link";
 import { FcBullish, FcBusinesswoman } from "react-icons/fc";
+import Link from "next/link";
 import ColorModeSwitcher from "../components/ColorModeSwitcher";
 import Logo from "../components/Logo";
 

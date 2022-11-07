@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Badge,
   Box,
@@ -16,7 +17,6 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import React from "react";
 import Layout from "../../components/Layout";
 
 const MamaMuda = () => {

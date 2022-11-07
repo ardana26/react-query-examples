@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Badge,
   Flex,
@@ -10,7 +11,6 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import React from "react";
 import Layout from "../../components/Layout";
 
 const Market = () => {
