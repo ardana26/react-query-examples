@@ -64,10 +64,26 @@ const MamaMuda = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const mutation = useMutation(submitMessage, {
-    onMutate: () => {
+    onMutate: async (newMessage) => {
       // mutation in progress
       // use for : spinner, disabled form, etc
-      console.log("onMutate");
+      // -------------------------------------
+      // optimistic update
+      // 1. cancel any outgoind refecth
+      await queryClient.cancelQueries("get-mama-muda");
+
+      // 2. snapshot the previous value
+      const previousMessages =
+        queryClient.getQueryData<MessageProps[]>("get-mama-muda");
+
+      // 3. optimistically update new value
+      if (previousMessages) {
+        newMessage = { ...newMessage, createdAt: new Date().toISOString() };
+        const finalMessages = [...previousMessages, newMessage];
+        queryClient.setQueryData("get-mama-muda", finalMessages);
+      }
+
+      return { previousMessages };
     },
     onSettled: async (data, error: any) => {
       // mutation done ->> success, error
@@ -82,9 +98,16 @@ const MamaMuda = () => {
         setErrorMessage(error.message);
       }
     },
-    onError: async () => {
+    onError: async (error: any, _variables, context: any) => {
       // mutation done with error response
-      console.log("onError");
+      // console.log("onError");
+      setErrorMessage(error.message);
+      if (context?.previousMessages) {
+        queryClient.setQueryData<MessageProps[]>(
+          "get-mama-muda",
+          context.previousMessages
+        );
+      }
     },
     onSuccess: async () => {
       // mutation done with success response
